@@ -1,4 +1,4 @@
-Caddy Bandwidth Throttling Module
+# Caddy Bandwidth Throttling Module
 
 This repository contains a bandwidth throttling module for Caddy v2, developed by Media Foundation. This module allows you to limit the bandwidth per subdomain in a CDN environment, providing granular control over resource consumption.
 
