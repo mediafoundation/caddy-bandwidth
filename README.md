@@ -51,8 +51,8 @@ client2.example.com {
 
 In this example, client1.example.com has a bandwidth limit of 100 KB/s and client2.example.com has a bandwidth limit of 200 KB/s.
 
-Support
+## Support
 If you encounter any issues or require assistance, please open an issue on the GitHub repository or contact Media Foundation directly.
 
-Credits
+## Credits
 This module is developed and maintained by Media Foundation. Special thanks to the Caddy community for their support and guidance.
