@@ -1,4 +1,4 @@
-# Media Foundation Caddy Bandwidth Throttling Module
+Caddy Bandwidth Throttling Module
 
 This repository contains a bandwidth throttling module for Caddy v2, developed by Media Foundation. This module allows you to limit the bandwidth per subdomain in a CDN environment, providing granular control over resource consumption.
 
@@ -14,16 +14,16 @@ To install and use the bandwidth throttling module, follow these steps:
 
 1. Clone this repository:
 
-git clone https://github.com/mediafoundation/caddy-bandwidth.git
+``git clone https://github.com/mediafoundation/caddy-bandwidth.git``
 
 2. Build Caddy with the custom module:
 
-xcaddy build --with github.com/mediafoundation/caddy-bandwidth@latest
+``xcaddy build --with github.com/mediafoundation/caddy-bandwidth@latest``
 
 
 3. Replace your existing Caddy binary with the newly built binary:
 
-sudo mv caddy /usr/bin/caddy
+``sudo mv caddy /usr/bin/caddy``
 
 ## Usage
 
