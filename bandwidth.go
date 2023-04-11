@@ -1,7 +1,6 @@
 package bandwidth
 
 import (
-	"io"
 	"net/http"
 
 	"github.com/caddyserver/caddy/v2"
