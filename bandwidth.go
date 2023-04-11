@@ -61,9 +61,15 @@ func parseCaddyfile(h httpcaddyfile.Helper) (caddyhttp.MiddlewareHandler, error)
 		for h.NextBlock(0) {
 			switch h.Val() {
 			case "limit":
-				if !h.Args(&m.Limit) {
+				if !h.NextArg() {
 					return nil, h.ArgErr()
 				}
+				limitStr := h.Val()
+				limit, err := strconv.Atoi(limitStr)
+				if err != nil {
+					return nil, fmt.Errorf("parsing limit value: %v", err)
+				}
+				m.Limit = limit
 			default:
 				return nil, h.Errf("unrecognized parameter '%s'", h.Val())
 			}
