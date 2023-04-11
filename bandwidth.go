@@ -3,7 +3,6 @@ package bandwidth
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig/httpcaddyfile"
@@ -30,9 +29,6 @@ func (Middleware) CaddyModule() caddy.ModuleInfo {
 func (m Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
 	if m.Limit > 0 {
 		limiter := rate.NewLimiter(rate.Limit(m.Limit), m.Limit)
-		ctx := r.Context()
-		ctx = limiter.Context(ctx)
-		r = r.WithContext(ctx)
 		w = &limitedResponseWriter{
 			ResponseWriter: w,
 			limiter:        limiter,
@@ -48,7 +44,7 @@ type limitedResponseWriter struct {
 
 func (l *limitedResponseWriter) Write(p []byte) (int, error) {
 	n := len(p)
-	err := l.limiter.WaitN(l.ResponseWriter.Context(), n)
+	err := l.limiter.WaitN(r.Context(), n)
 	if err != nil {
 		return 0, err
 	}
