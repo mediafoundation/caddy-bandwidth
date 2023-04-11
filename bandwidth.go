@@ -32,6 +32,7 @@ func (m Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddy
 		w = &limitedResponseWriter{
 			ResponseWriter: w,
 			limiter:        limiter,
+			r:              r,
 		}
 	}
 	return next.ServeHTTP(w, r)
@@ -40,11 +41,12 @@ func (m Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddy
 type limitedResponseWriter struct {
 	http.ResponseWriter
 	limiter *rate.Limiter
+	r       *http.Request
 }
 
 func (l *limitedResponseWriter) Write(p []byte) (int, error) {
 	n := len(p)
-	err := l.limiter.WaitN(r.Context(), n)
+	err := l.limiter.WaitN(l.r.Context(), n)
 	if err != nil {
 		return 0, err
 	}
