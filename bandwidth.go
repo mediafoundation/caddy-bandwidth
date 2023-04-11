@@ -42,18 +42,18 @@ type limitedResponseWriter struct {
 }
 
 func (l *limitedResponseWriter) Write(p []byte) (int, error) {
-	if l.remaining <= 0 {
-		return len(p), nil
-	}
+    if l.remaining <= 0 {
+        return 0, fmt.Errorf("bandwidth limit exceeded")
+    }
 
-	if int64(len(p)) > l.remaining {
-		p = p[:l.remaining]
-	}
+    if int64(len(p)) > l.remaining {
+        p = p[:l.remaining]
+    }
 
-	n, err := l.ResponseWriter.Write(p)
-	l.remaining -= int64(n)
+    n, err := l.ResponseWriter.Write(p)
+    l.remaining -= int64(n)
 
-	return n, err
+    return n, err
 }
 
 func parseCaddyfile(h httpcaddyfile.Helper) (caddyhttp.MiddlewareHandler, error) {
