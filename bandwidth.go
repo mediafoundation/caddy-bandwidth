@@ -2,13 +2,16 @@ package bandwidth
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/caddyserver/caddy/v2"
+	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
 )
 
 func init() {
 	caddy.RegisterModule(Middleware{})
+	caddyhttp.RegisterHandlerDirective("bandwidth", parseCaddyfile)
 }
 
 type Middleware struct {
@@ -20,6 +23,24 @@ func (Middleware) CaddyModule() caddy.ModuleInfo {
 		ID:  "http.handlers.bandwidth",
 		New: func() caddy.Module { return new(Middleware) },
 	}
+}
+
+func (m *Middleware) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
+	for d.Next() {
+		args := d.RemainingArgs()
+		if len(args) > 0 {
+			limit, err := strconv.Atoi(args[0])
+			if err != nil {
+				return d.Errf("parsing limit value: %v", err)
+			}
+			m.Limit = limit
+		}
+	}
+	return nil
+}
+
+func (m *Middleware) Provision(ctx caddy.Context) error {
+	return nil
 }
 
 func (m Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
@@ -50,4 +71,10 @@ func (l *limitedResponseWriter) Write(p []byte) (int, error) {
 	l.remaining -= int64(n)
 
 	return n, err
+}
+
+func parseCaddyfile(h caddyfile.Helper) (caddyhttp.MiddlewareHandler, error) {
+	var m Middleware
+	err := m.UnmarshalCaddyfile(h.Dispenser)
+	return m, err
 }
