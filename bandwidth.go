@@ -2,10 +2,14 @@ package bandwidth
 
 import (
 	"fmt"
-	"strconv"
+	"io"
 	"net/http"
+	"time"
 
 	"github.com/caddyserver/caddy/v2"
+	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
+	"golang.org/x/time/rate"
+	
 	"github.com/caddyserver/caddy/v2/caddyconfig/httpcaddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
 )
@@ -30,7 +34,7 @@ func (m Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddy
 	if m.Limit > 0 {
 		w = &limitedResponseWriter{
 			ResponseWriter: w,
-			remaining:      int64(m.Limit),
+			limiter:        rate.NewLimiter(rate.Limit(m.Limit), m.Limit),
 		}
 	}
 	return next.ServeHTTP(w, r)
@@ -38,24 +42,23 @@ func (m Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddy
 
 type limitedResponseWriter struct {
 	http.ResponseWriter
-	remaining int64
+	limiter *rate.Limiter
 }
 
 func (l *limitedResponseWriter) Write(p []byte) (int, error) {
-    if l.remaining <= 0 {
-        return 0, fmt.Errorf("bandwidth limit exceeded")
-    }
+	buf := make([]byte, len(p))
+	copy(buf, p)
+	_, err := l.limiter.WaitN(l.ResponseWriter.Context(), len(buf))
+	if err != nil {
+		return 0, fmt.Errorf("bandwidth limit exceeded: %v", err)
+	}
 
-    if int64(len(p)) > l.remaining {
-        p = p[:l.remaining]
-    }
-
-    n, err := l.ResponseWriter.Write(p)
-    l.remaining -= int64(n)
-
-    return n, err
+	n, err := io.CopyN(l.ResponseWriter, bytes.NewReader(buf), int64(len(buf)))
+	if err != nil && err != io.EOF {
+		return int(n), err
+	}
+	return int(n), nil
 }
-
 func parseCaddyfile(h httpcaddyfile.Helper) (caddyhttp.MiddlewareHandler, error) {
 	var m Middleware
 
@@ -63,15 +66,15 @@ func parseCaddyfile(h httpcaddyfile.Helper) (caddyhttp.MiddlewareHandler, error)
 		for h.NextBlock(0) {
 			switch h.Val() {
 			case "limit":
-				if !h.NextArg() {
+				limitStr := h.RemainingArgs()
+				if len(limitStr) != 1 {
 					return nil, h.ArgErr()
 				}
-				limitStr := h.Val()
-				limit, err := strconv.Atoi(limitStr)
+				var err error
+				m.Limit, err = strconv.Atoi(limitStr[0])
 				if err != nil {
-					return nil, fmt.Errorf("parsing limit value: %v", err)
+					return nil, h.Errf("parsing limit value: %v", err)
 				}
-				m.Limit = limit
 			default:
 				return nil, h.Errf("unrecognized parameter '%s'", h.Val())
 			}
