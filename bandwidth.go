@@ -1,17 +1,14 @@
 package bandwidth
 
 import (
-	"fmt"
-	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/caddyserver/caddy/v2"
-	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
-	"golang.org/x/time/rate"
-	
 	"github.com/caddyserver/caddy/v2/caddyconfig/httpcaddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
+	"golang.org/x/time/rate"
 )
 
 func init() {
@@ -32,9 +29,13 @@ func (Middleware) CaddyModule() caddy.ModuleInfo {
 
 func (m Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
 	if m.Limit > 0 {
+		limiter := rate.NewLimiter(rate.Limit(m.Limit), m.Limit)
+		ctx := r.Context()
+		ctx = limiter.Context(ctx)
+		r = r.WithContext(ctx)
 		w = &limitedResponseWriter{
 			ResponseWriter: w,
-			limiter:        rate.NewLimiter(rate.Limit(m.Limit), m.Limit),
+			limiter:        limiter,
 		}
 	}
 	return next.ServeHTTP(w, r)
@@ -46,19 +47,15 @@ type limitedResponseWriter struct {
 }
 
 func (l *limitedResponseWriter) Write(p []byte) (int, error) {
-	buf := make([]byte, len(p))
-	copy(buf, p)
-	_, err := l.limiter.WaitN(l.ResponseWriter.Context(), len(buf))
+	n := len(p)
+	err := l.limiter.WaitN(l.ResponseWriter.Context(), n)
 	if err != nil {
-		return 0, fmt.Errorf("bandwidth limit exceeded: %v", err)
+		return 0, err
 	}
 
-	n, err := io.CopyN(l.ResponseWriter, bytes.NewReader(buf), int64(len(buf)))
-	if err != nil && err != io.EOF {
-		return int(n), err
-	}
-	return int(n), nil
+	return l.ResponseWriter.Write(p)
 }
+
 func parseCaddyfile(h httpcaddyfile.Helper) (caddyhttp.MiddlewareHandler, error) {
 	var m Middleware
 
