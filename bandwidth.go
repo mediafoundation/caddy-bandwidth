@@ -16,7 +16,8 @@ func init() {
 }
 
 type Middleware struct {
-	Limit int `json:"limit,omitempty"`
+	Limit   int           `json:"limit,omitempty"`
+	limiter *rate.Limiter
 }
 
 func (Middleware) CaddyModule() caddy.ModuleInfo {
@@ -26,12 +27,18 @@ func (Middleware) CaddyModule() caddy.ModuleInfo {
 	}
 }
 
-func (m Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
+func (m *Middleware) Provision(ctx caddy.Context) error {
 	if m.Limit > 0 {
-		limiter := rate.NewLimiter(rate.Limit(m.Limit), m.Limit)
+		m.limiter = rate.NewLimiter(rate.Limit(m.Limit), m.Limit)
+	}
+	return nil
+}
+
+func (m Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
+	if m.limiter != nil {
 		w = &limitedResponseWriter{
 			ResponseWriter: w,
-			limiter:        limiter,
+			limiter:        m.limiter,
 			r:              r,
 		}
 	}
