@@ -41,6 +41,7 @@ route /myroute {
         limit 100000
     }
 }
+```
 
 In this example, the bandwidth for /myroute is limited to 100,000 bytes per second.
 
