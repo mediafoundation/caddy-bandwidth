@@ -4,15 +4,6 @@ Rev up your [Caddy v2](https://caddyserver.com/v2) server with the ability to fi
 
 🔗 Dive into Caddy's magic on their [GitHub](https://github.com/caddyserver/caddy).
 
-## 📖 Table of Contents
-
-- [📦 Installation](#installation)
-- [🖋 Usage](#usage)
-  - [💡 Real-World CDN Example](#real-world-cdn-example)
-- [🛠 Development](#development)
-- [📜 License](#license)
-- [📢 Join Our Community](#join-our-community)
-
 ## 📦 Installation
 
 Plug into the full power of Caddy by integrating our plugin. Let's get started:
@@ -81,3 +72,4 @@ Under the MIT License. Use responsibly.
 
 - 🎮 [Discord](https://discord.gg/nyCS7ePWzf)
 - 📫 [Telegram](https://t.me/Media_FDN)
+- 🐦 [X](https://t.me/Media_FDN)
