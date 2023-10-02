@@ -1,41 +1,42 @@
-# Caddy Bandwidth Limiter Plugin
+# 🚀 Caddy Bandwidth Limiter Plugin
 
-This is a plugin for [Caddy v2](https://caddyserver.com/v2) that provides the ability to limit the bandwidth of HTTP responses.
+Rev up your [Caddy v2](https://caddyserver.com/v2) server with the ability to finely control the bandwidth of your HTTP responses. Perfectly designed for CDN use-cases, this is not just another plugin — it's a **key component** of our soon-to-launch _Media Edge_ software, meticulously crafted from scratch! 🛠
 
-## Table of Contents
+🔗 Dive into Caddy's magic on their [GitHub](https://github.com/caddyserver/caddy).
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Development](#development)
-- [License](#license)
+## 📖 Table of Contents
 
-## Installation
+- [📦 Installation](#installation)
+- [🖋 Usage](#usage)
+  - [💡 Real-World CDN Example](#real-world-cdn-example)
+- [🛠 Development](#development)
+- [📜 License](#license)
+- [📢 Join Our Community](#join-our-community)
 
-This plugin can be installed as a part of Caddy. Follow the below steps:
+## 📦 Installation
 
-1. Install [xcaddy](https://github.com/caddyserver/xcaddy), a tool for building Caddy with plugins:
+Plug into the full power of Caddy by integrating our plugin. Let's get started:
 
-    ```bash
-    go get -u github.com/caddyserver/xcaddy/cmd/xcaddy
-    ```
+1. Grab [xcaddy](https://github.com/caddyserver/xcaddy):
 
-2. Build Caddy with this plugin:
+```bash
+go get -u github.com/caddyserver/xcaddy/cmd/xcaddy
+```
 
-    ```bash
-    xcaddy build --with github.com/mediafoundation/bandwidth
-    ```
+2. Build Caddy with our bandwidth plugin:
 
-This will produce a `caddy` binary in your current directory which includes the plugin.
+```bash
+xcaddy build --with github.com/mediafoundation/bandwidth
+```
 
-## Usage
+🎉 Voilà! You've got a `caddy` binary, now supercharged with our plugin.
 
-This plugin provides the `bandwidth` directive for use in your Caddyfile. The `bandwidth` directive accepts one argument, `limit`, which is the maximum number of bytes per second that the server will send.
+## 🖋 Usage
 
-Here's a basic example of how to use it in a Caddyfile:
+Eager to throttle bandwidth? Use the `bandwidth` directive in your Caddyfile to set the max bytes-per-second:
 
 ```caddy
 localhost
-
 route /myroute {
     bandwidth {
         limit 100000
@@ -43,12 +44,40 @@ route /myroute {
 }
 ```
 
-In this example, the bandwidth for /myroute is limited to 100,000 bytes per second.
+### 💡 Real-World CDN Example
 
-## Development
-This plugin uses standard Go conventions for its development. It consists of a Middleware struct which implements the caddyhttp.MiddlewareHandler interface, and a limitedResponseWriter which is used to limit the bandwidth of HTTP responses.
+Designed with CDN use-cases in mind, you can add bandwidth limits dynamically based on headers or other conditions:
 
-If you want to contribute to the development of this plugin, please feel free to submit issues and/or pull requests.
+```caddy
+header Server "MediaEdge vX.Y.Z"
+reverse_proxy http://localhost:8080 {
+    @hasBandwidthLimit header X-Bandwidth-Limit Yes
+    handle_response @hasBandwidthLimit {
+        bandwidth {
+            limit 50000
+        }
+    }
+}
+```
 
-## License
-This plugin is available under the MIT License.
+- `order bandwidth before header`: Place the bandwidth module before the header module in the processing order.
+- `auto_https disable_redirects`: Disables automatic HTTPS redirects.
+- `on_demand_tls`: Enables on-demand TLS certificate provisioning.
+- `log`: Customizes logging, for instance, using the Elastic format and specifying a file output path.
+  
+This allows you to have fine-grained control over bandwidth limits on a per-request basis!
+
+## 🛠 Development
+
+Our plugin adheres to standard Go conventions, featuring a `Middleware` struct that uses the `caddyhttp.MiddlewareHandler` interface. The `limitedResponseWriter` is meticulously designed to limit bandwidth.
+
+💡 Ideas? Contributions are welcome! Feel free to submit issues and pull requests.
+
+## 📜 License
+
+Under the MIT License. Use responsibly.
+
+## 📢 Join Our Community
+
+- 🎮 [Discord](https://discord.gg/nyCS7ePWzf)
+- 📫 [Telegram](https://t.me/Media_FDN)
