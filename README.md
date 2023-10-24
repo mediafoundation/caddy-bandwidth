@@ -40,6 +40,10 @@ route /myroute {
 Designed with CDN use-cases in mind, you can add bandwidth limits dynamically based on headers or other conditions:
 
 ```caddy
+{
+    order bandwidth before header
+}
+
 header Server "MediaEdge vX.Y.Z"
 reverse_proxy http://localhost:8080 {
     @hasBandwidthLimit header X-Bandwidth-Limit Yes
@@ -52,9 +56,6 @@ reverse_proxy http://localhost:8080 {
 ```
 
 - `order bandwidth before header`: Place the bandwidth module before the header module in the processing order.
-- `auto_https disable_redirects`: Disables automatic HTTPS redirects.
-- `on_demand_tls`: Enables on-demand TLS certificate provisioning.
-- `log`: Customizes logging, for instance, using the Elastic format and specifying a file output path.
   
 This allows you to have fine-grained control over bandwidth limits on a per-request basis!
 
