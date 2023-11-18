@@ -17,7 +17,7 @@ go get -u github.com/caddyserver/xcaddy/cmd/xcaddy
 2. Build Caddy with our bandwidth plugin:
 
 ```bash
-xcaddy build --with github.com/mediafoundation/bandwidth
+xcaddy build --with github.com/mediafoundation/caddy-bandwidth
 ```
 
 🎉 Voilà! You've got a `caddy` binary, now supercharged with our plugin.
